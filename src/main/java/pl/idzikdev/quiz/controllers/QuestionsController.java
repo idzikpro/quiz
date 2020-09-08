@@ -24,7 +24,7 @@ public class QuestionsController {
 
     private List<Question> questions = new ArrayList<>();
 
-    @GetMapping(produces = "application/jsongit ")
+    @GetMapping(produces = "application/json")
     public ResponseEntity<List<Question>> getQuestions() {
         return ResponseEntity.ok().header("Cache-Control", "max-age" + "=3600").body(questions);
     }
