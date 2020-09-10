@@ -9,8 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import pl.idzikdev.quiz.domain.model.Answer;
-import pl.idzikdev.quiz.domain.model.Question;
+import pl.idzikdev.quiz.domain.model.AnswerDto;
+import pl.idzikdev.quiz.domain.model.QuestionDto;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,19 +22,19 @@ import java.util.stream.Stream;
 @RequestMapping("/api/v1/questions")
 public class QuestionsController {
 
-    private List<Question> questions = new ArrayList<>();
+    private List<QuestionDto> questionDtos = new ArrayList<>();
 
     @GetMapping(produces = "application/json")
-    public ResponseEntity<List<Question>> getQuestions() {
-        return ResponseEntity.ok().header("Cache-Control", "max-age" + "=3600").body(questions);
+    public ResponseEntity<List<QuestionDto>> getQuestionDtos() {
+        return ResponseEntity.ok().header("Cache-Control", "max-age" + "=3600").body(questionDtos);
     }
 
 
     @GetMapping(params = {"name", "number"})
-    public ResponseEntity<Resources<Resource<Question>>> getQuestionsByNameAndNumber(@RequestParam String name,
-                                                                      @RequestParam Long number) {
-        Resources<Resource<Question>> resources = new Resources<>
-                (questions.stream()
+    public ResponseEntity<Resources<Resource<QuestionDto>>> getQuestionsByNameAndNumber(@RequestParam String name,
+                                                                                        @RequestParam Long number) {
+        Resources<Resource<QuestionDto>> resources = new Resources<>
+                (questionDtos.stream()
                         .filter(q -> q.getNumber() == number)
                         .filter(q -> name.equals(q.getName()))
                         .map(q -> mapToResource(q))
@@ -50,21 +50,21 @@ public class QuestionsController {
 
     @GetMapping(produces = MediaType.TEXT_PLAIN_VALUE)
     public String getQuestionsNames() {
-        return questions.stream()
+        return questionDtos.stream()
                 .map(q -> q.getName())
                 .reduce((s, next) -> String.join(",", s, next))
                 .orElse("");
     }
 
     @GetMapping("/{number}")
-    public ResponseEntity<Resource<Question>> getQuestion(@PathVariable Long number) {
+    public ResponseEntity<Resource<QuestionDto>> getQuestion(@PathVariable Long number) {
         return new ResponseEntity<>(mapToResource(findQuestionByNumber(number).get()), HttpStatus.OK);
     }
 
     @GetMapping
-    public ResponseEntity<Resources<Resource<Question>>> getAllQuestions() {
-        Resources<Resource<Question>> resources = new Resources<>(
-                questions.stream().map(q -> mapToResource(q)).collect(Collectors.toList())
+    public ResponseEntity<Resources<Resource<QuestionDto>>> getAllQuestions() {
+        Resources<Resource<QuestionDto>> resources = new Resources<>(
+                questionDtos.stream().map(q -> mapToResource(q)).collect(Collectors.toList())
         );
         addQuestionsLink(resources, "self");
         addFindQuestionsLink(resources, "questionsByNameAndNumber", null, null);
@@ -75,54 +75,54 @@ public class QuestionsController {
     @GetMapping("/{number}/name")
     public Optional<String> getNameOfQuestion(@PathVariable Long number) {
         return findQuestionByNumber(number)
-                .map(Question::getName);
+                .map(QuestionDto::getName);
     }
 
     @GetMapping(params = "name")
-    public Stream<Question> findQuestionByName(@RequestParam String name) {
-        return questions.stream().filter(q -> name.equals(q.getName()));
+    public Stream<QuestionDto> findQuestionByName(@RequestParam String name) {
+        return questionDtos.stream().filter(q -> name.equals(q.getName()));
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public void addQuestion(@RequestBody Question question) {
-        questions.add(question);
+    public void addQuestion(@RequestBody QuestionDto questionDto) {
+        questionDtos.add(questionDto);
     }
 
     @PostMapping(value = "/{number}/answers")
     public void addAnswer(@PathVariable Long number,
-                          @RequestBody Answer answer) {
-        questions.stream().filter(q -> q.getNumber() == number)
+                          @RequestBody AnswerDto answerDTO) {
+        questionDtos.stream().filter(q -> q.getNumber() == number)
                 .findAny()
-                .ifPresent(q -> q.getAnswers().add(answer));
+                .ifPresent(q -> q.getAnswers().add(answerDTO));
     }
 
 
     @PutMapping(value = "/{number}")
     private void replaceQuestion(@PathVariable Long number,
-                                 @RequestBody Question question) {
+                                 @RequestBody QuestionDto questionDto) {
         findQuestionByNumber(number)
                 .ifPresent(q -> {
-                    q.setName(question.getName());
-                    q.setAnswers(question.getAnswers());
+                    q.setName(questionDto.getName());
+                    q.setAnswers(questionDto.getAnswers());
                 });
     }
 
     @PatchMapping(value = "/{number}")
     private void updateQuestion(@PathVariable Long number,
-                                @RequestBody Question question) {
+                                @RequestBody QuestionDto questionDto) {
         findQuestionByNumber(number)
                 .ifPresent(q -> {
-                    if (question.getName() != null)
-                        q.setName(question.getName());
-                    if (question.getAnswers() != null)
-                        q.setAnswers(question.getAnswers());
+                    if (questionDto.getName() != null)
+                        q.setName(questionDto.getName());
+                    if (questionDto.getAnswers() != null)
+                        q.setAnswers(questionDto.getAnswers());
                 });
     }
 
     @DeleteMapping(value = "/{number}")
     private ResponseEntity<Object> removeQuestion(@PathVariable Long number) {
-        boolean removed = questions.removeIf(q -> q.getNumber() == number);
+        boolean removed = questionDtos.removeIf(q -> q.getNumber() == number);
         if (removed) {
             return ResponseEntity.ok().build();
         }
@@ -130,26 +130,26 @@ public class QuestionsController {
     }
 
 
-    private Optional<Question> findQuestionByNumber(Long number) {
-        return questions.stream()
+    private Optional<QuestionDto> findQuestionByNumber(Long number) {
+        return questionDtos.stream()
                 .filter(q -> q.getNumber() == number)
                 .findAny();
     }
 
-    private Resource<Question> mapToResource(Question question) {
-        Link link = ControllerLinkBuilder.linkTo(QuestionsController.class).slash(question.getNumber()).withSelfRel();
-        Resource<Question> questionResource = new Resource<>(findQuestionByNumber(question.getNumber()).get(), link);
+    private Resource<QuestionDto> mapToResource(QuestionDto questionDto) {
+        Link link = ControllerLinkBuilder.linkTo(QuestionsController.class).slash(questionDto.getNumber()).withSelfRel();
+        Resource<QuestionDto> questionResource = new Resource<>(findQuestionByNumber(questionDto.getNumber()).get(), link);
         return questionResource;
     }
 
-    private void addFindQuestionsLink(Resources<Resource<Question>> resources, String rel, String name, Long number) {
+    private void addFindQuestionsLink(Resources<Resource<QuestionDto>> resources, String rel, String name, Long number) {
         resources.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder
                 .methodOn(QuestionsController.class)
                 .getQuestionsByNameAndNumber(name, number))
                 .withRel(rel));
     }
 
-    private void addQuestionsLink(Resources<Resource<Question>> resources, String rel) {
+    private void addQuestionsLink(Resources<Resource<QuestionDto>> resources, String rel) {
         resources.add(ControllerLinkBuilder.linkTo(QuestionsController.class).withRel(rel));
     }
 }
