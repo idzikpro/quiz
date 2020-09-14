@@ -26,7 +26,7 @@ public class InMemoryUserDetailsServiceImpl implements UserDetailsService {
         users = new ArrayList<UserDetails>();
         users.add(new User("user","user",Arrays.asList("USER")));
         users.add(new User("foo","bar",Arrays.asList("USER")));
-        users.add(new User("admin","admin",Arrays.asList("USER", "ADMIN")));
+        users.add(new User("admin","admin",Arrays.asList("ADMIN")));
     }
 
 

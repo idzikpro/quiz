@@ -32,12 +32,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 .authorizeRequests()
                 .antMatchers("/login").permitAll()
+                .antMatchers("/css/**").permitAll()
                 .antMatchers("/swagger_ui.html").permitAll()
+                .antMatchers("/admin_panel").hasAuthority("ADMIN")
                 .anyRequest().authenticated()
                 .and()
                 .formLogin()
                 .loginPage("/login")
+                .defaultSuccessUrl("/user_panel", true)
                 .and()
-                .csrf().disable();
+                .logout()
+                .logoutUrl("/user_logout")
+                .logoutSuccessUrl("/login?logut")
+                .deleteCookies("cookies");
     }
 }

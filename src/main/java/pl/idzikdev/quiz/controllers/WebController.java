@@ -14,9 +14,29 @@ public class WebController {
         return mav;
     }
 
+    @RequestMapping(value = "/user_logout",method = RequestMethod.GET)
+    public ModelAndView userLogut(ModelAndView mav) {
+        mav.setViewName("login");
+        return mav;
+    }
+
+    @RequestMapping(value = "/admin_panel",method = RequestMethod.GET)
+    public ModelAndView adminPanel(ModelAndView mav) {
+        mav.setViewName("admin_panel");
+        return mav;
+    }
+
     @RequestMapping(value = "/login",method = RequestMethod.GET)
     public ModelAndView login(ModelAndView mav) {
         mav.setViewName("login");
         return mav;
     }
+
+    @RequestMapping(value = "/",method = RequestMethod.GET)
+    public ModelAndView getUserPanel(ModelAndView mav) {
+        mav.setViewName("user_panel");
+        return mav;
+    }
+
+
 }

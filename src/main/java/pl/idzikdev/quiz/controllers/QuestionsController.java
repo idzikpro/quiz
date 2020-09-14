@@ -2,6 +2,7 @@ package pl.idzikdev.quiz.controllers;
 
 
 import org.springframework.hateoas.Link;
+
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
