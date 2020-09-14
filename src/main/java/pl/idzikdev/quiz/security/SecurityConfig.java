@@ -1,30 +1,30 @@
 package pl.idzikdev.quiz.security;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import pl.idzikdev.quiz.provider.CustomDAOAuthenticationProvider;
+import pl.idzikdev.quiz.service.impl.JpaUserDetailsService;
 
 
 @Configuration
 @EnableWebSecurity(debug = false)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    AuthenticationProvider authenticationProvider;
+    JpaUserDetailsService jpaUserDetailsService;
+    CustomDAOAuthenticationProvider customDAOAuthenticationProvider;
 
-    @Autowired
-    public SecurityConfig(AuthenticationProvider authenticationProvider) {
-        this.authenticationProvider = authenticationProvider;
-        System.out.println("Hello");
+    public SecurityConfig(JpaUserDetailsService jpaUserDetailsService, CustomDAOAuthenticationProvider customDAOAuthenticationProvider) {
+        this.jpaUserDetailsService = jpaUserDetailsService;
+        this.customDAOAuthenticationProvider = customDAOAuthenticationProvider;
     }
-
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.authenticationProvider(authenticationProvider);
+        auth.userDetailsService(jpaUserDetailsService);
+        auth.authenticationProvider(customDAOAuthenticationProvider);
     }
 
     @Override
@@ -35,7 +35,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/css/**").permitAll()
                 .antMatchers("/swagger_ui.html").permitAll()
                 .antMatchers("/admin_panel").hasAuthority("ADMIN")
-                .anyRequest().authenticated()
+//                .antMatchers("/api/**").permitAll()
+                .anyRequest().permitAll()
                 .and()
                 .formLogin()
                 .loginPage("/login")
@@ -44,6 +45,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .logout()
                 .logoutUrl("/user_logout")
                 .logoutSuccessUrl("/login?logut")
-                .deleteCookies("cookies");
+                .deleteCookies("cookies")
+                .and()
+                .csrf().disable();
     }
 }

@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
 @Component
-public class InMemoryAuthenticationProvider implements AuthenticationProvider {
+public class CustomDAOAuthenticationProvider implements AuthenticationProvider {
 
     private static final String INCORRECT_PASSWORD = "Incorrect password";
     private static final String CREDENTIALS_CANNOT_BE_NULL = "Credentials cannot be null";
@@ -21,7 +21,7 @@ public class InMemoryAuthenticationProvider implements AuthenticationProvider {
     UserDetailsService userDetailsService;
 
     @Autowired
-    public InMemoryAuthenticationProvider(UserDetailsService userDetailsService) {
+    public CustomDAOAuthenticationProvider(UserDetailsService userDetailsService) {
         this.userDetailsService = userDetailsService;
     }
 
@@ -31,7 +31,6 @@ public class InMemoryAuthenticationProvider implements AuthenticationProvider {
         Object credentials = authentication.getCredentials();
         Assert.notNull(name, USERNAME_CANNOT_BE_NULL);
         Assert.notNull(credentials, CREDENTIALS_CANNOT_BE_NULL);
-
         if (!(credentials instanceof String)) {
             return null;
         }
@@ -50,10 +49,6 @@ public class InMemoryAuthenticationProvider implements AuthenticationProvider {
 
     @Override
     public boolean supports(Class<?> authentication) {
-        System.out.println("xDD");
         return authentication.equals(UsernamePasswordAuthenticationToken.class);
-
     }
-
 }
-
