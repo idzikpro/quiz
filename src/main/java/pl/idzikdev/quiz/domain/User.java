@@ -37,6 +37,14 @@ public class User implements UserDetails {
         return idUser;
     }
 
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
     public void setIdUser(Long idUser) {
         this.idUser = idUser;
     }
